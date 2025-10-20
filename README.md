@@ -1,94 +1,97 @@
 # universal-qr-generator
 
-Universal QR Generator is a small, production-ready utility that generates a single QR code which redirects mobile users to the correct app store (App Store or Google Play) depending on their device. It's implemented as a single Angular application with an embedded Express backend for redirect logic and QR image generation, and is intended to be run locally, in Docker, or in simple hosting platforms.
+Universal QR Generator is a small utility that creates a single QR code which redirects mobile users to the appropriate app store (App Store or Google Play) depending on device type.
+
+This repository contains two primary pieces:
+
+- `universal-qr-angular/` — the Angular frontend application (UI to enter iOS/Android store links and preview/download QR images).
+- `backend/` — a minimal Express backend that generates QR images and exposes a redirect endpoint. The backend stores generated mapping files under `backend/qrcodes/`.
 
 ## 🧩 Architecture Overview
 
-High-level architecture:
+- Frontend: Angular (client) — UI and build artifacts served by NGINX in production image.
+- Backend: Express (Node) — handles `/api/generate` to create QR assets and `/redirect/:id` (or `/api/r/:id`) to route mobile users to the correct app store.
+- Deployment: Docker Compose is included and runs NGINX (serving the frontend) with a proxied backend service.
 
-- Frontend: Angular (client) — UI to provide iOS App Store URL and Google Play URL and to preview/download generated QR codes.
-- Embedded backend: Express (Node.js) — lightweight API used for redirect logic and for generating QR PNG/SVG via the `qrcode` npm package.
-- Shared: TypeScript across frontend and backend for consistent types and DX.
-- Packaging / Deployment: Docker Compose provided to build and run the app container easily (single container serves both UI and redirect API).
+Stack summary
 
-Stack:
+- Angular 20+ (frontend)
+- Express (Node.js) backend
+- qrcode npm package for QR generation
+- NGINX (production static serving + API proxy)
+- Docker & Docker Compose for containerized deployment
 
-- Angular 17+ (frontend)
-- Express (Node.js) for backend API and redirect logic
-- TypeScript for both frontend and backend code
-- qrcode npm package for generating QR images
-- Docker & Docker Compose for containerized builds and run
+## Quickstart — local development
 
-## Quickstart
+1) Frontend (dev server):
 
-Prerequisites:
+```bash
+cd universal-qr-angular
+npm ci
+npm start     # or: ng serve
+```
 
-- Node.js (>= 18) and npm
-- Docker & Docker Compose (for containerized run)
+Open http://localhost:4200.
 
-Local development (frontend dev server):
+The frontend dev server expects the backend to be available at http://localhost:3000 when running locally (this is the dev default used by the Angular app). Run the backend below.
 
-1. Install dependencies:
+2) Backend (local):
 
-	cd frontend
-	npm install
+```bash
+cd backend
+npm ci
+node server.js    # starts on port 5000 by default (see backend/Dockerfile and server.js)
+```
 
-2. Start the dev server:
+By default the backend exposes:
+- POST /api/generate — accepts JSON { iosLink, androidLink } and returns { id, qrUrl, redirectUrl }
+- GET /redirect/:id or GET /api/r/:id — redirects to the correct store based on user-agent
 
-	npm start
+Note: Some dev setups in this repo used port 3000 for the backend; the `backend/server.js` in this repo listens on port 5000 by default. Update the frontend API URL in `universal-qr-angular/src/app/qr-generator/qr-generator.ts` if you run the backend on a different port.
 
-3. Open your browser to http://localhost:4200
+## Docker (production) — one-command
 
-Note: The development server runs the Angular app only. The embedded Express server is wired for production builds / Docker.
+The repository includes a Dockerfile and an NGINX config to serve the built Angular app and proxy `/api/` requests to the backend service defined in Compose.
 
-Docker (build and run):
+Start the full stack with Docker Compose:
 
-1. Build and run with Docker Compose (recommended):
+```bash
+# from repository root
+docker compose up --build
+```
 
-	docker compose up --build
+Compose will build the frontend, the backend service, and start NGINX to serve the static files. The NGINX proxy routes API calls to the backend service defined in `docker-compose.yml`.
 
-2. Open http://localhost:4200 (or the port configured in your Docker Compose or container)
-
-If no `docker-compose.yml` is present, a simple Dockerfile-based build is still supported by creating a container that serves the Angular distribution with the embedded Express server.
-
-## Redirect and QR behavior
-
-- The app accepts two inputs: an iOS App Store URL and an Android Play Store URL.
-- When a user scans the generated QR code, the request hits a lightweight redirect endpoint which detects the user-agent and forwards the user to the correct store URL.
-- Optionally the API can return a PNG or SVG of the QR code for download or embedding.
+Open http://localhost:8080 (or check `docker-compose.yml` for configured port).
 
 ## File layout (important files)
 
-- `frontend/` — Angular app source
-  - `src/` — Angular app entry and components
-  - `package.json` — frontend scripts and dependencies
-- `Dockerfile` (optional) — container build instructions
-- `docker-compose.yml` (optional) — compose orchestration
+- `universal-qr-angular/` — Angular app and build artifacts
+	- `src/` — application source
+	- `Dockerfile` — multi-stage build to build the Angular app
+	- `nginx.conf` — nginx configuration used by the production image
+- `backend/` — Express backend
+	- `server.js` — runtime JS server (CommonJS/ESM depending on file)
+	- `server.ts` — TypeScript source (optional)
+	- `qrcodes/` — generated QR images and metadata
 
-## Development notes
+## Production notes
 
-- Use TypeScript types shared between client and server where possible to avoid duplication.
-- The `qrcode` npm package is used server-side to produce PNG/SVG representations. Install it with `npm install qrcode` in the server context if needed.
-- For production, enable appropriate security and rate limiting on redirect endpoints (see Express middlewares like `express-rate-limit`).
+- The production image uses NGINX to serve static files and proxy `/api/` to the backend. This keeps frontend and backend in separate containers and allows scaling the backend independently.
+- The backend persists QR data under `backend/qrcodes/` by writing JSON and PNG files. For production you may want to replace this with a database or persistent volume.
 
-## Testing
+## Troubleshooting
 
-- Frontend unit tests: `cd frontend && npm test`
+- If the frontend shows no QR/redirect link after generation, confirm the backend returned a `qrUrl` or `redirectUrl` key. The frontend accepts both `qrImage` (data URL) and `qrUrl` (static PNG URL); it will also accept an `id` and build a redirect link.
+- If Docker Compose fails to connect to the Docker daemon, ensure Docker Engine is running locally.
 
 ## Contribution
 
-Contributions are welcome. Please open an issue or a pull request with a clear description of the change.
+Contributions welcome — open an issue or PR. Small suggestions I can add on request:
+- Add a `docker-compose.override.yml` for development convenience.
+- Add a persistent Docker volume for `backend/qrcodes/`.
+- Convert the TypeScript backend to compile in the build stage instead of shipping a compiled JS file.
 
 ## License
 
 See the `LICENSE` file in this repository.
-
----
-
-If you'd like, I can also:
-
-- Add a `docker-compose.yml` and `Dockerfile` example.
-- Add a small note with recommended environment variables for configuring redirect behavior.
-- Generate a minimal Express redirect implementation and a small server README inside `frontend/`.
-
-Tell me which of the extras you'd like and I'll add them next.

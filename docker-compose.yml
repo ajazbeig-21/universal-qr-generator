@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: universal-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - universal-network
+
+  frontend:
+    build: ./universal-qr-angular
+    container_name: universal-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - universal-network
+
+networks:
+  universal-network:
+    driver: bridge
