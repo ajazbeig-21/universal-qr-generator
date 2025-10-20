@@ -1,0 +1,23 @@
+<div class="container">
+  <h2>📱 Universal App QR Generator</h2>
+
+  <div class="input-box">
+    <label>iOS App Store Link</label>
+    <input [(ngModel)]="iosLink" placeholder="https://apps.apple.com/..." />
+  </div>
+
+  <div class="input-box">
+    <label>Android Play Store Link</label>
+    <input [(ngModel)]="androidLink" placeholder="https://play.google.com/..." />
+  </div>
+
+  <button (click)="generate()" [disabled]="loading">
+    {{ loading ? 'Generating...' : 'Generate QR Code' }}
+  </button>
+
+  <div class="result" *ngIf="qrImage">
+    <h4>Scan QR or open link:</h4>
+    <img [src]="qrImage" width="200px" alt="QR Code" />
+    <p><a [href]="redirectUrl" target="_blank">{{ redirectUrl }}</a></p>
+  </div>
+</div>
