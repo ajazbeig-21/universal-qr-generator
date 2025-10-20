@@ -27,8 +27,8 @@ Stack summary
 
 ```bash
 cd universal-qr-angular
-npm ci
-npm start     # or: ng serve
+npm install
+ng serve     # or: ng serve
 ```
 
 Open http://localhost:4200.
@@ -39,7 +39,7 @@ The frontend dev server expects the backend to be available at http://localhost:
 
 ```bash
 cd backend
-npm ci
+npm install
 node server.js    # starts on port 5000 by default (see backend/Dockerfile and server.js)
 ```
 
