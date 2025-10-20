@@ -1,28 +1,124 @@
-# Angular specific
-/dist/
-/out-tsc/
-/tmp/
-/coverage/
-/e2e/test-output/
-/.angular/
-.angular/
+# =========================================================
+# 🏗️ MONOREPO GITIGNORE (Angular in /universal-qr-angular + Node.js in /backend)
+# =========================================================
 
-# Node modules and dependency files
-/node_modules/
-/package-lock.json
-/yarn.lock
-
-# Environment files
-/.env
-
-# Angular CLI and build artefacts
-/.angular-cli.json
-/.ng/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Logs
+# ----------------------------
+# Global
+# ----------------------------
+.DS_Store
+Thumbs.db
+*.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+*.rej
+
+# OS-specific
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Node.js global
+node_modules/
+coverage/
+dist/
+build/
+tmp/
+.cache/
+.nyc_output/
+logs/
+pids/
+*.pid
+*.seed
+*.pid.lock
+*.gz
+
+# ----------------------------
+# Angular App (universal-qr-angular/)
+# ----------------------------
+universal-qr-angular/node_modules/
+universal-qr-angular/dist/
+universal-qr-angular/tmp/
+universal-qr-angular/.angular/
+universal-qr-angular/.angular/cache/
+universal-qr-angular/.angular/analytics.json
+
+# Angular build outputs
+universal-qr-angular/**/dist/
+universal-qr-angular/**/.angular/
+
+# Environment files
+universal-qr-angular/src/environments/environment*.ts
+!universal-qr-angular/src/environments/environment.example.ts
+
+# ----------------------------
+# Node.js Backend (backend/)
+# ----------------------------
+backend/node_modules/
+backend/logs/
+backend/qrcodes/
+backend/dist/
+backend/tmp/
+backend/.env
+backend/.env.*
+
+# Debug and profiler
+backend/debug.log
+backend/npm-debug.log
+backend/yarn-error.log
+backend/.pm2/
+backend/.cache/
+
+# ----------------------------
+# Docker / Containers
+# ----------------------------
+docker-compose.override.yml
+.docker/
+*.tar
+*.img
+
+# ----------------------------
+# Git + CI/CD
+# ----------------------------
+.gitignore
+.gitmodules
+.github/
+.gitlab/
+*.bak
+*.old
+
+# ----------------------------
+# Misc / Tools
+# ----------------------------
+*.iml
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon?
+
+# ----------------------------
+# Test / Reports
+# ----------------------------
+coverage/
+test-results/
+reports/
