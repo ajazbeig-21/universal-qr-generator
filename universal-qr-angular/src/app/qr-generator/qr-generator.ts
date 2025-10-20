@@ -18,7 +18,7 @@ export class QrGenerator {
 
   generate() {
     if (!this.iosLink || !this.androidLink) {
-      alert('Please enter both links');
+      alert('Please enter both links1');
       return;
     }
     this.loading = true;

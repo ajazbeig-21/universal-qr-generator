@@ -15,7 +15,7 @@
     {{ loading ? 'Generating...' : 'Generate QR Code' }}
   </button>
 
-  <div class="result" *ngIf="qrImage">
+  <div class="result" >
     <h4>Scan QR or open link:</h4>
     <img [src]="qrImage" width="200px" alt="QR Code" />
     <p><a [href]="redirectUrl" target="_blank">{{ redirectUrl }}</a></p>
